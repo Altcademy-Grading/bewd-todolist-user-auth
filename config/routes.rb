@@ -22,7 +22,7 @@ Rails.application.routes.draw do
   delete '/sessions'                 => 'sessions#destroy'
 
   # Add routes below above line
-
+  post '/users' => 'users#create'
   # Redirect all other paths to index page, which will be taken over by AngularJS
   get '*path' => 'homepage#index'
 end
