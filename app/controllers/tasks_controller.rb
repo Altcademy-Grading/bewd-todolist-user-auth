@@ -20,7 +20,10 @@ class TasksController < ApplicationController
     token = cookies.signed[:todolist_session_token]
     session = Session.find_by(token: token)
 
-    if session
+    if session && params[:parent_task_id].present?
+      parent_task = Task.find_by(id: params[:parent_task_id])
+      @task = parent_task.child_tasks.new(task_params) if parent_task
+    elsif session
       user = session.user
       @task = user.tasks.new(task_params)
 
@@ -47,7 +50,10 @@ class TasksController < ApplicationController
   def mark_complete
     @task = Task.find_by(id: params[:id])
 
-    render 'tasks/update' if @task&.update(completed: true)
+    if @task&.update(completed: true)
+      @task.child_tasks.update_all(completed: true)
+      render 'tasks/update'
+    end
   end
 
   def mark_active

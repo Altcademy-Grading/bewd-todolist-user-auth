@@ -10,6 +10,7 @@ RSpec.describe Task, type: :model do
 
     it 'belongs to a user' do
       expect(Task.new.user).to be_nil
+      expect(Task.new.parent_task).to be_nil
     end
   end
 
@@ -28,6 +29,9 @@ RSpec.describe Task, type: :model do
       expect {
         task.completed
       }.not_to raise_error
+      expect {
+        task.child_tasks
+      }.not_to raise_error
     end
   end
 
@@ -44,4 +48,15 @@ RSpec.describe Task, type: :model do
       }.to raise_error(ActiveRecord::RecordInvalid)
     end
   end
-end
+  end
+
+  describe 'nested tasks' do
+    let(:parent_task) { create(:task) }
+    let(:child_task) { create(:task, parent_task: parent_task) }
+
+    it 'marks child tasks as completed when parent task is marked as completed' do
+      parent_task.update(completed: true)
+      child_task.reload
+      expect(child_task.completed).to be true
+    end
+  end
